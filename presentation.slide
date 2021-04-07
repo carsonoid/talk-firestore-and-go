@@ -1,0 +1,448 @@
+# Firestore And Go
+
+Utah Gophers 2020
+
+Carson Anderson
+DevX Engineer, Weave
+@carson_ops
+
+https://github.com/carsonoid/talk-firestore-and-go
+
+## Coming To Terms
+
+* Firebase vs Firestore vs Datastore
+  * Firebase - A suite of APIs and tools for developing mobile apps in GC
+  * Firestore - A realtime NoSQL database used to provide the latest Firebase features
+  * Datastore - The legacy verison of Firestore, still more performant in some cases
+
+## This is about using Firestore with Go to build powerful products!
+
+.image images/fs-and-gopher.png 400 _
+
+.caption _Gopher_ by [[https://github.com/MariaLetta/free-gophers-pack][Maria Letta]]
+
+## So what is Firestore
+
+A globally available, infinitely scalable NoSQL datastore
+
+Features:
+
+* Basic CRUD + Patching of Documents
+* Live watches of Documents And Collections
+* Transactions
+* Batch Writes
+* Probably Free! (*For many use cases*)
+
+## Hype Time!
+
+## How to get started
+
+A Google Cloud Account is required. Luckly they are free!
+
+1. Navigate to https://console.cloud.google.com
+2. Log in with an existing Google account or create a new one
+3. That's it! You can now start using Firestore!
+
+## Try it out!
+
+.link https://console.cloud.google.com
+
+.image images/fs-setup.png
+
+## Sort of...
+
+Firestore is going to ask you to make some **big decisions** first!
+
+.image images/fs-setup-questions.png 500 _
+
+## These matter!
+
+**Choices are permanent for the project** - So I recommmend trying it in a throwaway project first, in case you change your mind.
+
+* Choose between "Native mode" and "Datastore Mode"
+* Choose a location
+  * Price is region dependent
+  * Carolina is the same price as us multi
+  * Most other US regions are about half cost to multi
+
+You **must choose**  Native Mode for the things I'm about to show you to work!
+
+Region is up to you
+
+## Terms: Project, Collections, & Documents
+
+* Projects can contain any number of Collections
+* Collections can contain an number of Documents
+* Documents contain the actual data
+
+.image images/symbols.png
+
+## You MUST alernate between Collections & Docs
+
+And there is always a host project for the "root collection"
+
+.image images/colldocs.png _ 1100
+
+## Or, more acurately
+
+.image images/projectfulldocs.png _ 1100
+
+## Seem Familiar?
+
+`http://localhost:8080/customers/weave/users/bob/emails/primary`
+
+## Seem Familiar?
+
+`http://localhost:8080/customers/weave/users/bob/emails/primary`
+
+.image images/doc-coll-url.png _ 1100
+
+- Collection - customers
+- Document - weave
+- Collection - users
+- Document - bob
+- Collection - emails
+- Document - primary
+
+## That being said... Collections don't really exist
+
+Much like with objects in many other datastores: Collections are a grouping abstraction only.
+
+* This is a good thing!
+* You don't ever have to pre-create or cleanup collections
+
+## Typed Data
+
+Data in firestore documents is typed. The types correspond loosely to JSON types with some additional custom types.
+
+The Firestore Go SDK does the applicable conversions automatically.
+
+## Basic JSON-y Types
+
+* Null
+* Boolean
+* String
+* Integer
+* Array
+* Map
+
+
+## Custom Types
+
+* DateTime -  `time.Time`
+* Bytes - `[]byte`
+* Reference - A reference to another firestore Collection or Document
+  * Ex: `projects/[PROJECT_ID]/databases/[DATABASE_ID]/documents/[DOCUMENT_PATH]`
+* Geographical Point - A Lat/Long position
+  * Ex: `40.4162205`, `-111.8718743`
+  * Used primarily by Mobile SDKs for nearby or area searches
+
+## UI Demo time!
+
+## Free Tier
+
+Firestore has a very generous free quota.
+
+You get the following for FREE per DAY per LOCATION
+
+* Document Reads - 50,000
+* Document Writes - 20,000
+* Document Deletes - 20,000
+* Stored Data - 1GB
+
+Projects start with the free quote enabled so you can start using firestore at no cost.
+
+Many properly designed use cases can easily fall under the limits above which can allow you to run **for free forever**.
+
+## SDK Setup
+
+.code examples/setup.sh
+
+## Client Creation
+
+.play examples/client-basic.go
+
+## Advanced options
+
+.code examples/basic.go /START ADVCLIENT OMIT/,/END ADVCLIENT OMIT/
+
+## CRUD!
+
+## Document Struct
+
+.code examples/basic.go /START CUSTOMER OMIT/,/END CUSTOMER OMIT/
+
+## Getting Started
+
+.code examples/docref.go /START CREATE OMIT/,/END CREATE OMIT/
+
+## DocumentRef
+
+`firestore.DocumentRef` is a handle to a document
+
+* It never contains actual data from the document it references
+* Having a ref to a document does not mean it exists
+
+## DocumentRef Creation
+
+.play -edit examples/docrefs.go /START DOCREF OMIT/,/END DOCREF OMIT/
+
+## Create
+
+.play -edit examples/create.go /START CREATE OMIT/,/END CREATE OMIT/
+
+## WriteResult
+
+That's not our data...
+
+.code examples/create.go /START WriteResult OMIT/,/END WriteResult OMIT/
+
+## GET
+
+.play examples/get.go /START GET OMIT/,/END GET OMIT/
+
+## Data From Snapshots
+
+.play examples/get-data.go /START GET OMIT/,/END GET OMIT/
+
+## Set
+
+.play examples/set.go /START SET OMIT/,/END SET OMIT/
+
+
+## Set - Merge
+
+.play examples/set-merge.go /START SET OMIT/,/END SET OMIT/
+
+## Set - Merge All
+
+.play -edit examples/set-mergeall.go /START SET OMIT/,/END SET OMIT/
+
+## Update
+
+.play examples/update.go /START UPDATE OMIT/,/END UPDATE OMIT/
+
+## Update - Advanced
+
+.play examples/update-adv.go /START UPDATE OMIT/,/END UPDATE OMIT/
+
+## Update - Conditions
+
+You can also set update "preconditions" for more update safety
+
+.play examples/update-cond.go /START UPDATE OMIT/,/END UPDATE OMIT/
+
+## Delete
+
+.play examples/delete.go /START DELETE OMIT/,/END DELETE OMIT/
+
+## Getting Multiple Documents - Queries
+
+.play -edit examples/query.go /START QUERY OMIT/,/END QUERY OMIT/
+
+## Queries
+
+* Where
+* Sort
+* Limit
+* Start/StartAfter
+* End/EndAfter
+* Paging
+* OrderBy
+
+## Important!
+
+Firestore can be your best friend!
+
+ ...or your worst enemy!
+
+Depending on how you structure your data, and how you expect to get it back out
+
+## Complex Queries
+
+.play examples/query-complex.go /START QUERY OMIT/,/END QUERY OMIT/
+
+## Queries, indices, & limitations
+
+* Basic and complex indices exist for all strings
+* You cannot order by two different non-string fields without making an index yourself
+
+TL;DR: This is fine:
+
+.code examples/query-complex.go /START QUERY VALID OMIT/,/END QUERY VALID OMIT/
+
+Learn more:
+
+.link https://firebase.google.com/docs/firestore/query-data/queries#go_11
+
+## Watches
+
+It's possible to setup watches on a document or collection or query
+
+* Watches are sent in real time as create/update/deletes happen
+* Each sent document counts as a "Read" in for billing / quotas
+
+## Document Watches
+
+Watches are done with an Iterator:
+
+.code examples/watch-doc.go /START ITER OMIT/,/END ITER OMIT/
+
+## Document Watch - Setup Background Ops
+
+.code examples/watch-doc.go /START OPS OMIT/,/END OPS OMIT/
+
+## Document Watch - Run Iterator
+
+.play examples/watch-doc.go /START WATCH OMIT/,/END WATCH OMIT/
+
+## Document Watch - Takeaways
+
+* `ADD` and `UPDATE` events are hard to distinguish and you shouldn't rely telling the difference
+* `DELETE` events that happen when your code isn't running might get missed. Don't rely on them for any actual cleanup
+  * If you need this, try something like the `deleteTimestamp` and `finalizers` system that Kubernetes uses
+* Iterators always return a snapshot initially, check `.Exists` before trying to use it
+
+## Collection Watches
+
+Not officially supported by the SDK.... But why should that stop us?
+
+.code examples/watch-collection.go /START ITER OMIT/,/END ITER OMIT/
+
+## Collection Watch - Setup Background Ops
+
+.code examples/watch-collection.go /START OPS OMIT/,/END OPS OMIT/
+
+## Collection Watch - Run Iterator
+
+The iterator is handled in an infinite `for` loop like with docs
+
+.play examples/watch-collection.go /START WATCH OMIT/,/END WATCH OMIT/
+
+## Collection Watch - Iterator Work
+
+.play examples/watch-collection.go /START WATCHWORK OMIT/,/END WATCHWORK OMIT/
+
+.play examples/collection-cleanup.go /START CLEANUPLINE OMIT/,/END CLEANUPLINE OMIT/
+
+## Collection Watch - Caveats
+
+* `ADD` events happen for all existings docs in a collection on watch start, even if they existed before
+* `UPDATE` events do not get sent for updates that didn't actually change the document data
+* Again, each update sent in the watch counts as a read in for billing an quotas
+* As with docs: Events that happen when the code is not running could be missed. Don't count on them for meaningful document change processing
+
+<!-- ## Collection - Cleanup .play examples/collection-cleanup.go /START CLEANUP OMIT/,/END CLEANUP OMIT/ -->
+
+## Transactions
+
+Firestore supports doing multiple operations in a single call. Transactions:
+
+* Are limited to 500 docs per transaction
+* Are best used when you want to update a doc based on existing data in the doc or another doc
+* Are all-or-nothing and never do partial updates
+* Do automatic retries on failure
+
+## Transaction - Example
+
+.play -edit examples/transactions.go /START TRANSACTION OMIT/,/END TRANSACTION OMIT/
+
+## Transactions - Cont
+
+You can mix/match any of the following in a transaction
+
+* `Get`
+* `Delete`
+* `Set`
+* `Update`
+
+You can also get pessemistic locks on documents for the duration of a transaction
+
+* `Get` - Get and lock a single doc by reference
+* `GetAll` - Get and lock an explicit list of docs by references, Not really "All"
+
+## Transactions can be canceled and no changes will happen
+
+.play examples/transaction-fail.go /START TRANSACTION OMIT/,/END TRANSACTION OMIT/
+
+## Transactions can be run readonly
+
+.play examples/transaction-readonly.go /START TRANSACTION OMIT/,/END TRANSACTION OMIT/
+
+## Batch Writes
+
+Batches writes are esentially optimized transactions that don't support reading docs
+
+They are limited to 500 docs per batch
+
+.play examples/batch-writes.go /START BATCH OMIT/,/END BATCH OMIT/
+
+## Batch Writes - Cont
+
+You can mix/match any of the following in a batch
+
+* `Create`
+* `Delete`
+* `Set`
+* `Update`
+
+## Batches vs Transactions?
+
+* Batches are faster and don't care about concurrent writes
+* Batches tend to have fewer errors due to lack of concurrency checking
+* Transactions can do Reads of existing data to use for the current operation
+* Transactions retry if the documents are modified during the transaction
+* Transactions can be run in readonly mode to safely get data from multiple docs at once
+* Both are atomic and do all the updates or none at all
+
+## Security
+
+The easiest way to deal with firestore permissions is to use the project-wide roles in GCP IAM
+
+The following roles can be given to IAM users. They apply to all data in the project:
+
+* `roles/datastore.user` - r/w to all collections and documents
+* `roles/datastore.viewer` - readonly to all collections and documents
+
+These roles apply to users and do not add any cost or overhead and can be done via the standard GCP CLI/UI/API
+
+## Deeper Security with Rules
+
+The *Mobile* and *Web* client SDKs allow for the use of more granular rules, but the Go SDK, which authenticates via IAM, does not support these rules.
+
+My best advices is:
+
+1. Use more projects when you need more granularity
+2. Don't use Firestore in cases where you need complex access policy
+
+## Restrictions & Limits
+
+* The entire doc must be < 1MB in total
+* Collection and Doc IDs have limits
+* Nearly all fields have size limits
+
+.link https://firebase.google.com/docs/firestore/quotas See Firestore Quotas page for more details
+
+## Integration Testing
+
+There is an emulator for firestore that allows you to run integration
+tests in your code against a fake firestore API
+
+https://cloud.google.com/sdk/gcloud/reference/beta/emulators/firestore/
+
+The emulator supports everything Firestore proper does. In fact, it's how I've been running all the examples!
+
+From the Readme.md:
+
+.code README.md /# Start emulator/,/# Open http/
+
+## We're Hiring!
+
+Weave
+
+.link https://boards.greenhouse.io/weavehq
+
+DevX
+
+.link https://boards.greenhouse.io/weavehq/jobs/4373401003
+.link https://boards.greenhouse.io/weavehq/jobs/4439397003
